@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     fs::{read, File},
     io::{self, BufRead},
     ops::Index,
@@ -8,7 +8,7 @@ use std::{
 use regex::Regex;
 
 fn main() {
-    day5();
+    day6();
 }
 
 fn day1() {
@@ -158,7 +158,7 @@ fn day4() {
     let mut count = 0;
     let mut count2 = 0;
     // Type conversion be like
-    let arr = reader
+    let arr: Vec<Vec<char>> = reader
         .lines()
         .filter_map(|x| x.ok())
         .map(|x| x.chars().collect::<Vec<char>>())
@@ -318,4 +318,101 @@ fn day5() {
         }
     }
     println!("{count}, {count2}");
+}
+
+fn day6() {
+    let prob = File::open("src/adventfiles/day6").unwrap();
+    let reader = io::BufReader::new(prob);
+    let mut arr: Vec<Vec<char>> = reader
+        .lines()
+        .filter_map(|x| x.ok())
+        .map(|x| x.chars().collect::<Vec<char>>())
+        .collect::<Vec<Vec<char>>>();
+    let mut keep_going = true; 
+    let mut coor_map:HashSet<(i32, i32)> = HashSet::new();
+    let rowmax = arr.len();
+    let colmax = arr[0].len();
+    
+    let mut count = 0;
+
+    while keep_going {
+        for r in 0..arr.len() {
+            for c in 0..arr[r].len() {
+                if arr[r][c] == '^' {
+                    if r == 0 {
+                        keep_going = false;
+                        if coor_map.insert((r as i32, c as i32)) {
+                            count += 1;
+                        }
+                        break;
+                    } else {
+                        if arr[r-1][c] == '#' {
+                            arr[r][c] = '>';
+                        } else {
+                            arr[r][c] = '.';
+                            arr[r-1][c] = '^';
+                            if coor_map.insert((r as i32, c as i32)) {
+                                count += 1;
+                            }
+                        }
+                    }
+                } else if arr[r][c] == 'v' {
+                    if r == rowmax - 1 {
+                        keep_going = false;
+                        if coor_map.insert((r as i32, c as i32)) {
+                            count += 1;
+                        }
+                        break;
+                    } else {
+                        if arr[r+1][c] == '#' {
+                            arr[r][c] = '<';
+                        } else {
+                            arr[r][c] = '.';
+                            arr[r+1][c] = 'v';
+                            if coor_map.insert((r as i32, c as i32)) {
+                                count += 1;
+                            }
+                        }
+                    }
+                } else if arr[r][c] == '>' {
+                    if c == colmax - 1 {
+                        keep_going = false;
+                        if coor_map.insert((r as i32, c as i32)) {
+                            count += 1;
+                        }
+                        break;
+                    } else {
+                        if arr[r][c+1] == '#' {
+                            arr[r][c] = 'v';
+                        } else {
+                            arr[r][c] = '.';
+                            arr[r][c+1] = '>';
+                            if coor_map.insert((r as i32, c as i32)) {
+                                count += 1;
+                            }
+                        }
+                    }
+                } else if arr[r][c] == '<' {
+                    if c == 0 {
+                        keep_going = false;
+                        if coor_map.insert((r as i32, c as i32)) {
+                            count += 1;
+                        }
+                        break;
+                    } else {
+                        if arr[r][c-1] == '#' {
+                            arr[r][c] = '^';
+                        } else {
+                            arr[r][c] = '.';
+                            arr[r][c-1] = '<';
+                            if coor_map.insert((r as i32, c as i32)) {
+                                count += 1;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    println!("{count}");
 }
